@@ -5,21 +5,22 @@ import requests
 import http.cookiejar as cookielib
 import re
 from PIL import Image
-import code_classify.classify
-import ddl.des
+import CODE
+import DES
 
 login_url = "https://portal1.ecnu.edu.cn/cas/login?service=https%3A%2F%2Felearning.ecnu.edu.cn%2Fwebapps%2Fcas-hdsfdx-BBLEARN%2Findex.jsp"
+
 
 def login(username, password):
     print("开始模拟登录大夏学堂")
 
     print("正在创建cookie")
     m_session = requests.Session()
-    #m_session.cookies = cookielib.LWPCookieJar(filename="r_Cookies.txt")
+    # m_session.cookies = cookielib.LWPCookieJar(filename="r_Cookies.txt")
     print("cookie创建完成")
 
     print("正在获取lt与execution")
-    lt,execution = get_params(m_session)
+    lt, execution = get_params(m_session)
     print("lt与execution获取完成")
 
     print("正在处理验证码")
@@ -29,46 +30,50 @@ def login(username, password):
     data = {
         'code': code,
         'loginFace': "",
-        "rsa": ddl.des.Des(username + password + lt),
-        "ul":str(len(username)),
-        "pl":str(len(password)),
-        "lt":lt,
+        "rsa": DES.Des(username + password + lt),
+        "ul": str(len(username)),
+        "pl": str(len(password)),
+        "lt": lt,
         "execution": execution,
         '_eventId': "submit"
     }
-    print("Data Form数据为：",data)
+    print("Data Form数据为：", data)
 
     print("向登录界面发送报文")
-    page=m_session.post(login_url, data=data)
-    print("发送报文成功:",page.status_code)
+    page = m_session.post(login_url, data=data)
+    print("发送报文成功:", page.status_code)
+    print(username,password,len(page.headers))
+    if len(page.headers) == 16:
+        print("登陆成功")
+        return m_session, True
+    else:
+        print("登陆失败")
+        return m_session, False
 
-    print("登陆成功")
-
-    return m_session
 
 def get_params(m_session):
     page = m_session.get(login_url)
-    #print(page.text)
+    # print(page.text)
     reg1 = '<input type="hidden" id="lt" name="lt" value="(.+)" />'
     lt = re.findall(reg1, page.text)[0]
     reg2 = '<input type="hidden" name="execution" value="(.+)" />'
     execution = re.findall(reg2, page.text)[0]
     return lt, execution
 
+
 def get_code(m_session):
     code_msg = m_session.get("https://portal1.ecnu.edu.cn/cas/code")
     pic = Image.open(BytesIO(code_msg.content))
-    code = code_classify.classify.classify_code(pic)
+    code = CODE.classify_code(pic)
     return code
 
-def get_ddl(username, password):
-    m_session = login(username, password)
 
+def get_ddl(m_session):
     print("开始获取ddl")
 
-    #print("拉取大夏学堂页面")
-    #page = m_session.get(tar_url)
-    #print(r.text)
+    # print("拉取大夏学堂页面")
+    # page = m_session.get(tar_url)
+    # print(r.text)
 
     print("获取课程成绩链接")
     courses = get_course_url(m_session)
@@ -81,6 +86,7 @@ def get_ddl(username, password):
 
     return ddls
 
+
 def get_course_url(m_session):
     tar_url = "https://elearning.ecnu.edu.cn/webapps/portal/execute/tabs/tabAction"
     data = {
@@ -90,21 +96,25 @@ def get_course_url(m_session):
         "tab_tab_group_id": "_30_1"
     }
     page = m_session.post(tar_url, data=data)
-    #print(page.text)
+    # print(page.text)
     courses = {}
     reg = '<a href=" (.+)" target="_top">(.+)</a>'
     for course in re.findall(reg, page.text):
-        courses[course[1]] = "https://elearning.ecnu.edu.cn/webapps/bb-mygrades-BBLEARN/myGrades?course_id="+course[0][52:-5]+"&stream_name=mygrades&is_stream=false"
-    #print(courses)
+        courses[course[1]] = "https://elearning.ecnu.edu.cn/webapps/bb-mygrades-BBLEARN/myGrades?course_id=" \
+                             + course[0][52:-5] \
+                             + "&stream_name=mygrades&is_stream=false"
+    # print(courses)
 
     return courses
 
-def get_course_ddl(m_session, course, url):
-    print("开始获取:"+course)
-    page = m_session.get(url)
-    #print(page.text)
 
-    reg = """<div id="(.+)" position="(?:.+)" lastactivity="0" duedate="(.+)" class="sortable_item_row upcoming_item_row row expanded">
+def get_course_ddl(m_session, course, url):
+    print("开始获取:" + course)
+    page = m_session.get(url)
+    # print(page.text)
+
+    reg = """    <!-- Calculated Rows -->
+      <div id="(.+)" position="(?:.+)" lastactivity="0" duedate="(.+)" class="sortable_item_row upcoming_item_row row expanded">
         
         <!-- Items Column -->
         <div class="cell gradable">
@@ -123,16 +133,16 @@ def get_course_ddl(m_session, course, url):
 
 
 def format_ddl(ddls):
-    res = ["已为您检索全部未完成ddl，Aliy不对准确性做任何保障，可不要轻信Aliy。\n"]
+    res = "已为您检索全部未完成ddl，Aliy不对准确性做任何保障，可不要轻信Aliy。\n"
     today = time.time()
     for course in ddls:
         s = ""
         for line in ddls[course]:
             time_label = int(line[1][:-3])
-            delta_time = time_label-today
+            delta_time = time_label - today
             ddl = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time_label))
-            s+="任务名称：%s，任务类型：%s，截止时间：%s，剩余时间：%s\n"%(line[2],line[4],ddl,datetime.timedelta(seconds=delta_time))
+            s += "任务名称：%s，任务类型：%s，截止时间：%s，剩余时间：%s\n" % (line[2], line[4], ddl, datetime.timedelta(seconds=delta_time))
         if s:
-            s= course+":\n"+s
-            res.append(s)
+            s = course + ":\n" + s
+            res+=s
     return res

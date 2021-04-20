@@ -1,7 +1,7 @@
 from PIL import Image
 from PIL import ImageChops
 
-nums = [Image.open("./number/%d.png"%i) for i in range(10)]
+nums = [Image.open("CODE/number/%d.png"%i) for i in range(10)]
 
 # 识别整个验证码
 def classify_code(pic):
@@ -31,5 +31,3 @@ def split_pic(pic):
 # 二值化
 def to_black_and_white(pic):
     return pic.convert('1')
-
-
