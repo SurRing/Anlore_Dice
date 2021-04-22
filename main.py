@@ -1,11 +1,11 @@
+import asyncio
 from graia.broadcast import Broadcast
 from graia.application import GraiaMiraiApplication, Session
 from graia.application.message.chain import MessageChain
-import asyncio
-
+from graia.scheduler import GraiaScheduler
+from graia.scheduler.timers import crontabify
 from graia.application.message.elements.internal import Plain
 from graia.application.friend import Friend
-
 import category
 
 loop = asyncio.get_event_loop()
@@ -20,6 +20,9 @@ app = GraiaMiraiApplication(
         websocket=True  # Graia 已经可以根据所配置的消息接收的方式来保证消息接收部分的正常运作.
     )
 )
+scheduler = GraiaScheduler(
+    loop, bcc
+)
 
 @bcc.receiver("FriendMessage")
 async def friend_message_listener(message: MessageChain, app: GraiaMiraiApplication, friend: Friend):
@@ -29,4 +32,10 @@ async def friend_message_listener(message: MessageChain, app: GraiaMiraiApplicat
             Plain(s)
         ]))
 
+@scheduler.schedule(crontabify("* * * * * *"))
+def something_scheduled():
+    print("print every seconds.")
+
+print("Hello?App start?")
 app.launch_blocking()
+print("Hello?App end?")
