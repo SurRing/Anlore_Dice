@@ -7,6 +7,8 @@ from graia.scheduler.timers import crontabify
 from graia.application.message.elements.internal import Plain
 from graia.application.friend import Friend
 import category
+import DDL
+import time
 
 loop = asyncio.get_event_loop()
 
@@ -26,7 +28,7 @@ scheduler = GraiaScheduler(
 
 @bcc.receiver("FriendMessage")
 async def friend_message_listener(message: MessageChain, app: GraiaMiraiApplication, friend: Friend):
-    s = category.process(message.asDisplay(), friend.nickname)
+    s = category.process(message.asDisplay(), friend)
     if s != None:
         await app.sendFriendMessage(friend, MessageChain.create([
             Plain(s)
@@ -34,8 +36,11 @@ async def friend_message_listener(message: MessageChain, app: GraiaMiraiApplicat
 
 @scheduler.schedule(crontabify("* * * * * *"))
 def something_scheduled():
-    print("print every seconds.")
+    now = time.localtime(time.time())
+    if now.tm_min==0 and now.tm_sec == 0:
+        for clock in DDL.check_clock(now):
+            await app.sendFriendMessage(clock[0], MessageChain.create([
+                Plain("您的任务：%s将在%s截止"%(clock[2],time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(clock[1]))))
+            ]))
 
-print("Hello?App start?")
 app.launch_blocking()
-print("Hello?App end?")

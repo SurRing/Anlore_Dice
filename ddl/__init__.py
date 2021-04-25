@@ -7,6 +7,8 @@ import re
 from PIL import Image
 import CODE
 import DES
+from sql import DDL_DB
+
 
 login_url = "https://portal1.ecnu.edu.cn/cas/login?service=https%3A%2F%2Felearning.ecnu.edu.cn%2Fwebapps%2Fcas-hdsfdx-BBLEARN%2Findex.jsp"
 
@@ -68,7 +70,7 @@ def get_code(m_session):
     return code
 
 
-def get_ddl(m_session):
+def update_ddl(m_session, owner, update_time):
     print("开始获取ddl")
 
     # print("拉取大夏学堂页面")
@@ -81,8 +83,12 @@ def get_ddl(m_session):
 
     ddls = {}
     for course in courses:
-        ddls[course] = get_course_ddl(m_session, course, courses[course])
+        ddls[course] = update_course_ddl(m_session, course, courses[course],update_time)
     print("已获取到ddl：", ddls)
+
+    print("正在更新信息")
+    update_user(owner, ddls)
+    print("信息更新完成")
 
     return ddls
 
@@ -108,7 +114,7 @@ def get_course_url(m_session):
     return courses
 
 
-def get_course_ddl(m_session, course, url):
+def update_course_ddl(m_session, course, url, update_time):
     print("开始获取:" + course)
     page = m_session.get(url)
     # print(page.text)
@@ -126,8 +132,10 @@ def get_course_ddl(m_session, course, url):
         </div>"""
 
     ddls = []
+    now = time.time()
     for line in re.findall(reg, page.text):
-        ddls.append(line)
+        if int(line[1][:-3]) > max(now, update_time):
+            ddls.append(line)
 
     return ddls
 
@@ -146,3 +154,12 @@ def format_ddl(ddls):
             s = course + ":\n" + s
             res+=s
     return res
+
+def check_clock(time):
+    DDL_DB.delete_useless_clock()
+    return DDL_DB.read_clock_by_time(time)
+
+def update_user(owner, ddls):
+    for course in ddls:
+        for clock in ddls[course]:
+            DDL_DB.write_clock(owner, clock[1], clock[4], clock[0])

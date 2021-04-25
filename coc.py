@@ -34,12 +34,12 @@ def match(s):
 
     return res
 
-def process(s, name):
+def process(s, friend):
     bodys = match(s)
     if type(bodys) != list:
         return bodys
 
-    res = f"{name}进行了人体炼成:\n"
+    res = f"{friend.nickname}进行了人体炼成:\n"
     for line in bodys:
         res += f"力量:{line[0]},体质:{line[1]},体型:{line[2]},敏捷:{line[3]},外貌:{line[4]},智力:{line[5]},意志:{line[6]},教育:{line[7]},总和:{sum(line)}\n"
     res+="注入灵魂吧！"
