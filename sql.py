@@ -75,7 +75,7 @@ class SqlController:
         return cursor.fetchall()
 
     def delete_useless_clock(self):
-        sql = "delete * from clock where time < %d" %time.time()*1000
+        sql = "delete * from clock where time < %d" %(time.time()*1000)
         self.curs.execute(sql)
 
         self.conn.commit()
