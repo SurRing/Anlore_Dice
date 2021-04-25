@@ -9,7 +9,6 @@ import CODE
 import DES
 from sql import DDL_DB
 
-
 login_url = "https://portal1.ecnu.edu.cn/cas/login?service=https%3A%2F%2Felearning.ecnu.edu.cn%2Fwebapps%2Fcas-hdsfdx-BBLEARN%2Findex.jsp"
 
 
@@ -44,7 +43,7 @@ def login(username, password):
     print("向登录界面发送报文")
     page = m_session.post(login_url, data=data)
     print("发送报文成功:", page.status_code)
-    print(username,password,len(page.headers))
+    print(username, password, len(page.headers))
     if len(page.headers) == 16:
         print("登陆成功")
         return m_session, True
@@ -121,7 +120,7 @@ def update_course_ddl(m_session, course, url):
 
     reg = """    <!-- Calculated Rows -->
       <div id="(.+)" position="(?:.+)" lastactivity="0" duedate="(.+)" class="sortable_item_row upcoming_item_row row expanded">
-        
+
         <!-- Items Column -->
         <div class="cell gradable">
           (.+)<div class="activityType">
@@ -134,7 +133,7 @@ def update_course_ddl(m_session, course, url):
     ddls = []
     now = time.time()
     for line in re.findall(reg, page.text):
-        if int(line[1]) > now*1000:
+        if int(line[1][:-3]) > now:
             ddls.append(line)
 
     return ddls
@@ -152,29 +151,28 @@ def format_ddl(ddls):
             s += "任务名称：%s，任务类型：%s，截止时间：%s，剩余时间：%s\n" % (line[2], line[4], ddl, datetime.timedelta(seconds=delta_time))
         if s:
             s = course + ":\n" + s
-            res+=s
+            res += s
     return res
+
 
 def check_clock_by_time(time):
     DDL_DB.delete_useless_clock()
     return DDL_DB.read_clock_by_time(time)
 
+
 def check_clock_by_user(owner):
     DDL_DB.delete_useless_clock()
     return DDL_DB.read_clock_by_owner(owner)
 
+
 def update_user(owner, ddls):
     for course in ddls:
         for clock in ddls[course]:
-            print(clock)
-            DDL_DB.write_clock(owner, int(clock[1]), course+"$"+clock[2]+"$"+clock[4], int(clock[0]))
+            DDL_DB.write_clock(owner, int(clock[1]), course + "$" + clock[2] + "$" + clock[4], int(clock[0]))
+
 
 def auto_update():
     for owner in DDL_DB.get_auto_update():
-        user = DDL_DB.read_user(owner)
-        m_session, _ = login(user[0],user[1])
-        update_ddl(m_session, owner)
-
-m_s,_ = login("10205102406","Sur_20029806")
-ddls = update_ddl(m_s,563424794)
-print(ddls)
+        user = DDL_DB.read_user(owner[0])
+        m_session, _ = login(user[1], user[2])
+        update_ddl(m_session, owner[0])
