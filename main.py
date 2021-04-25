@@ -35,12 +35,14 @@ async def friend_message_listener(message: MessageChain, app: GraiaMiraiApplicat
         ]))
 
 @scheduler.schedule(crontabify("* * * * * *"))
-def something_scheduled():
-    now = time.localtime(time.time())
-    if now.tm_min==0 and now.tm_sec == 0:
+async def something_scheduled():
+    now = time.time()
+    localtime = time.localtime(now)
+    if localtime.tm_hour == 18 and localtime.tm_min == 0 and localtime.tm_sec == 0:
+        DDL.auto_update()
         for clock in DDL.check_clock(now):
-            app.sendFriendMessage(clock[0], MessageChain.create([
-                Plain("您的任务：%s将在%s截止"%(clock[2],time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(clock[1]))))
+            await app.sendFriendMessage(clock[0], MessageChain.create([
+                Plain("您的任务：%s将在%s截止"%(clock[2],time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(clock[1]/1000))))
             ]))
 
 app.launch_blocking()

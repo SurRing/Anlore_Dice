@@ -65,7 +65,7 @@ class SqlController:
             self.conn.commit()
 
     def read_clock_by_time(self, time):
-        sql = "select * from clock where time >= %d AND time <= %d" % (time, time+2*24*60*60*1000)
+        sql = "select * from clock where time >= %d AND time <= %d" % (time*1000, time*1000+20*24*60*60*1000)
         cursor = self.curs.execute(sql)
 
         return cursor.fetchall()
@@ -93,5 +93,9 @@ class SqlController:
         self.curs.execute(sql)
 
         self.conn.commit()
+
+    def get_auto_update(self):
+        sql = "select * from auto_update"
+        return self.curs.execute(sql).fetchall()
 
 DDL_DB = SqlController("ddl.db")
