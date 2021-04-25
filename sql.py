@@ -57,7 +57,7 @@ class SqlController:
         return cursor.fetchone()
 
     def write_clock(self, number, time, prescription, id):
-        sql = "select * from clock where owner=%d and id=%d"%(number,id)
+        sql = "select * from clock where owner={0} and id={1}".format(number,id)
         if not self.curs.execute(sql).fetchall():
             sql = "insert into clock values({0},{1},'{2}',{3})".format(number, time, prescription, id)
             self.curs.execute(sql)

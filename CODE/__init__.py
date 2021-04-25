@@ -1,7 +1,7 @@
 from PIL import Image
 from PIL import ImageChops
 
-nums = [Image.open("../CODE/number/%d.png"%i) for i in range(10)]
+nums = [Image.open("CODE/number/%d.png"%i) for i in range(10)]
 
 # 识别整个验证码
 def classify_code(pic):
