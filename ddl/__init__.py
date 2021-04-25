@@ -70,7 +70,7 @@ def get_code(m_session):
     return code
 
 
-def update_ddl(m_session, owner, update_time):
+def update_ddl(m_session, owner):
     print("开始获取ddl")
 
     # print("拉取大夏学堂页面")
@@ -83,7 +83,7 @@ def update_ddl(m_session, owner, update_time):
 
     ddls = {}
     for course in courses:
-        ddls[course] = update_course_ddl(m_session, course, courses[course],update_time)
+        ddls[course] = update_course_ddl(m_session, course, courses[course])
     print("已获取到ddl：", ddls)
 
     print("正在更新信息")
@@ -114,7 +114,7 @@ def get_course_url(m_session):
     return courses
 
 
-def update_course_ddl(m_session, course, url, update_time):
+def update_course_ddl(m_session, course, url):
     print("开始获取:" + course)
     page = m_session.get(url)
     # print(page.text)
@@ -134,7 +134,7 @@ def update_course_ddl(m_session, course, url, update_time):
     ddls = []
     now = time.time()
     for line in re.findall(reg, page.text):
-        if int(line[1][:-3]) > max(now, update_time):
+        if int(line[1][:-3]) > now:
             ddls.append(line)
 
     return ddls

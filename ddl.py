@@ -28,9 +28,9 @@ def match(s, friend):
 
     elif m[1]=="update":
         user = DDL_DB.read_user(friend.id)
-        m_session, success = DDL.login(user, m[2])
+        m_session, success = DDL.login(user[1], user[2])
         if success:
-            ddls = DDL.update_ddl(m_session, m[3])
+            ddls = DDL.update_ddl(m_session, user[0])
             for course in ddls:
                 for clock in ddls[course]:
                     DDL_DB.write_clock(friend.id, int(clock[1][:-3]), course+":"+clock[2]+"-"+clock[4])
