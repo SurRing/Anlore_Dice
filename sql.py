@@ -65,7 +65,7 @@ class SqlController:
             self.conn.commit()
 
     def read_clock_by_time(self, time):
-        sql = "select * from clock where time >= %d AND time <= %d" % (time*1000, time*1000+20*24*60*60*1000)
+        sql = "select * from clock where time >= %d AND time <= %d" % (time*1000, time*1000+2*24*60*60*1000)
         cursor = self.curs.execute(sql)
 
         return cursor.fetchall()
