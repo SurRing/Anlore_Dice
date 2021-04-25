@@ -40,7 +40,7 @@ async def something_scheduled():
     localtime = time.localtime(now)
     if localtime.tm_hour == 18 and localtime.tm_min == 0 and localtime.tm_sec == 0:
         DDL.auto_update()
-        for clock in DDL.check_clock(now):
+        for clock in DDL.check_clock_by_time(now):
             await app.sendFriendMessage(clock[0], MessageChain.create([
                 Plain("您的任务：%s将在%s截止"%(clock[2],time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(clock[1]/1000))))
             ]))

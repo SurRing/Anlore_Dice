@@ -22,18 +22,17 @@ def match(s, friend):
     m=re.match(cmd_reg,s)
     if m==None:
         return "指令错误"
+    if not DDL_DB.check_user(friend.id):
+        return "请先登录"
 
     if m[1]=="check":
-        return DDL.check_clock(time.time())
+        return str(DDL.check_clock_by_user(friend.id))
 
     elif m[1]=="update":
         user = DDL_DB.read_user(friend.id)
         m_session, success = DDL.login(user[1], user[2])
         if success:
             ddls = DDL.update_ddl(m_session, user[0])
-            for course in ddls:
-                for clock in ddls[course]:
-                    DDL_DB.write_clock(friend.id, int(clock[1][:-3]), course+":"+clock[2]+"-"+clock[4])
             return DDL.format_ddl(ddls)
         else:
             return "哎呀登录失败了"

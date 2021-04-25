@@ -98,4 +98,8 @@ class SqlController:
         sql = "select * from auto_update"
         return self.curs.execute(sql).fetchall()
 
+    def check_user(self, owner):
+        sql = "select * from user where owner=%d"%owner
+        return self.curs.execute(sql).fetchall()
+
 DDL_DB = SqlController("ddl.db")

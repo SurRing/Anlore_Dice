@@ -134,7 +134,7 @@ def update_course_ddl(m_session, course, url):
     ddls = []
     now = time.time()
     for line in re.findall(reg, page.text):
-        if int(line[1][:-3]) > now:
+        if int(line[1]) > now*1000:
             ddls.append(line)
 
     return ddls
@@ -155,17 +155,26 @@ def format_ddl(ddls):
             res+=s
     return res
 
-def check_clock(time):
+def check_clock_by_time(time):
     DDL_DB.delete_useless_clock()
     return DDL_DB.read_clock_by_time(time)
+
+def check_clock_by_user(owner):
+    DDL_DB.delete_useless_clock()
+    return DDL_DB.read_clock_by_owner(owner)
 
 def update_user(owner, ddls):
     for course in ddls:
         for clock in ddls[course]:
-            DDL_DB.write_clock(owner, clock[1], clock[4], clock[0])
+            print(clock)
+            DDL_DB.write_clock(owner, int(clock[1]), course+"$"+clock[2]+"$"+clock[4], int(clock[0]))
 
 def auto_update():
     for owner in DDL_DB.get_auto_update():
         user = DDL_DB.read_user(owner)
-        m_session ,_ = login(user[0],user[1])
+        m_session, _ = login(user[0],user[1])
         update_ddl(m_session, owner)
+
+m_s,_ = login("10205102406","Sur_20029806")
+ddls = update_ddl(m_s,563424794)
+print(ddls)
