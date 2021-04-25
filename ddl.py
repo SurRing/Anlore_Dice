@@ -3,18 +3,12 @@ import time
 import DDL
 from sql import DDL_DB
 
-ddl_reg = "^/ddl (.+)"
 login_reg = "^/ddl login (\d*) (.*)"
-check_reg = "^/ddl check"
-update_reg = "^/ddl update"
-auto_update_reg = "^/ddl auto_update"
+cmd_reg = "^/ddl (\w*)"
 
 def match(s, friend):
-    m = re.match(ddl_reg,s)
-    if m==None:
-        return "你谁啊？"
-
-    if m[1] == "login":
+    m = re.match(login_reg,s)
+    if m!=None:
         m = re.match(login_reg,s)
         if m == None:
             return "参数错误"
@@ -25,7 +19,11 @@ def match(s, friend):
         else:
             return "登陆失败"
 
-    elif m[1]=="check":
+    m=re.match(cmd_reg,s)
+    if m==None:
+        return "指令错误"
+
+    if m[1]=="check":
         return DDL.check_clock(time.time)
 
     elif m[1]=="update":

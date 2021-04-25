@@ -39,7 +39,7 @@ def something_scheduled():
     now = time.localtime(time.time())
     if now.tm_min==0 and now.tm_sec == 0:
         for clock in DDL.check_clock(now):
-            await app.sendFriendMessage(clock[0], MessageChain.create([
+            app.sendFriendMessage(clock[0], MessageChain.create([
                 Plain("您的任务：%s将在%s截止"%(clock[2],time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(clock[1]))))
             ]))
 

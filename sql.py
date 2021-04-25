@@ -46,7 +46,7 @@ class SqlController:
         self.conn.commit()
 
     def write_user(self, number, username, password):
-        sql = "insert into user values(%d,'%s','%s',%d) ON DUPLICATE KEY UPDATE" % (number, username, password, time.time())
+        sql = "replace into user values(%d,'%s','%s',%d)" % (number, username, password, time.time())
         self.curs.execute(sql)
 
         self.conn.commit()
@@ -64,8 +64,7 @@ class SqlController:
         self.conn.commit()
 
     def write_clock(self, number, time, prescription, id):
-        sql = "if not exists (select 1 from clock where number={0} and id={3}) " \
-              "insert into clock values({0},{1},'{2}',{3})".format(number, time, prescription, id)
+        sql = "insert into clock values({0},{1},'{2}',{3})".format(number, time, prescription, id)
         self.curs.execute(sql)
 
         self.conn.commit()
@@ -89,7 +88,7 @@ class SqlController:
         self.conn.commit()
 
     def add_auto_update(self, owner):
-        sql = "insert into user value (%d) ON DUPLICATE KEY UPDATE" % owner
+        sql = "replace into user value (%d)" % owner
         self.curs.execute(sql)
 
         self.conn.commit()
