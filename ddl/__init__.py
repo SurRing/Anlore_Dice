@@ -157,7 +157,7 @@ def format_ddl(ddls):
 
 def check_clock(time):
     DDL_DB.delete_useless_clock()
-    return DDL_DB.read_clock_by_time(time)
+    return str(DDL_DB.read_clock_by_time(time))
 
 def update_user(owner, ddls):
     for course in ddls:
