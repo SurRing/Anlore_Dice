@@ -57,10 +57,12 @@ class SqlController:
         return cursor.fetchone()
 
     def write_clock(self, number, time, prescription, id):
-        sql = "insert into clock values({0},{1},'{2}',{3}) when not (select 1 from clock where owner={0} and id={3})".format(number, time, prescription, id)
-        self.curs.execute(sql)
+        sql = "select * from clock where owner={0} and id={3}"%(number,id)
+        if not self.curs.execute(sql).fetchall():
+            sql = "insert into clock values({0},{1},'{2}',{3})".format(number, time, prescription, id)
+            self.curs.execute(sql)
 
-        self.conn.commit()
+            self.conn.commit()
 
     def read_clock_by_time(self, time):
         sql = "select * from clock where time >= %d AND time <= %d" % (time, time+20*24*60*60)
