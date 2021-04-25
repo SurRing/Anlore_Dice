@@ -157,9 +157,15 @@ def format_ddl(ddls):
 
 def check_clock(time):
     DDL_DB.delete_useless_clock()
-    return str(DDL_DB.read_clock_by_time(time))
+    return DDL_DB.read_clock_by_time(time)
 
 def update_user(owner, ddls):
     for course in ddls:
         for clock in ddls[course]:
             DDL_DB.write_clock(owner, clock[1], clock[4], clock[0])
+
+def auto_update():
+    for owner in DDL_DB.get_auto_update():
+        user = DDL_DB.read_user(owner)
+        m_session ,_ = login(user[0],user[1])
+        update_ddl(m_session, owner)
