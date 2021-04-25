@@ -24,7 +24,7 @@ def match(s, friend):
         return "指令错误"
 
     if m[1]=="check":
-        return DDL.check_clock(time.time)
+        return DDL.check_clock(time.time())
 
     elif m[1]=="update":
         user = DDL_DB.read_user(friend.id)
@@ -45,7 +45,7 @@ def match(s, friend):
         return "/ddl login username password 更新登录信息\n" \
                "/ddl check 获取当前dll\n" \
                "/ddl update 更新ddl\n" \
-               "/ddl update 加入自动更新"
+               "/ddl auto_update 加入自动更新"
 
 
 def process(s, friend):

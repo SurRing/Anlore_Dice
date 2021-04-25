@@ -57,7 +57,7 @@ class SqlController:
         return cursor.fetchone()
 
     def write_clock(self, number, time, prescription, id):
-        sql = "select * from clock where owner={0} and id={3}"%(number,id)
+        sql = "select * from clock where owner=%d and id=%d"%(number,id)
         if not self.curs.execute(sql).fetchall():
             sql = "insert into clock values({0},{1},'{2}',{3})".format(number, time, prescription, id)
             self.curs.execute(sql)
@@ -65,7 +65,7 @@ class SqlController:
             self.conn.commit()
 
     def read_clock_by_time(self, time):
-        sql = "select * from clock where time >= %d AND time <= %d" % (time, time+20*24*60*60)
+        sql = "select * from clock where time >= %d AND time <= %d" % (time, time+2*24*60*60*1000)
         cursor = self.curs.execute(sql)
 
         return cursor.fetchall()
@@ -77,19 +77,19 @@ class SqlController:
         return cursor.fetchall()
 
     def delete_useless_clock(self):
-        sql = "delete * from clock where time < %d" %(time.time()*1000)
+        sql = "delete from clock where time < %d" %(time.time()*1000)
         self.curs.execute(sql)
 
         self.conn.commit()
 
     def add_auto_update(self, owner):
-        sql = "replace into user value (%d)" % owner
+        sql = "replace into auto_update values(%d)" % owner
         self.curs.execute(sql)
 
         self.conn.commit()
 
     def delete_auto_update(self, owner):
-        sql = "delete from user where owner=%d"%owner
+        sql = "delete from auto_update where owner=%d"%owner
         self.curs.execute(sql)
 
         self.conn.commit()
